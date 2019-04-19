@@ -1,8 +1,8 @@
 ---
 # Please set spring_action and release(if needed):
 #
-spring_action: 'install' # install, update, rollback
-spring_app_repo_release: 
+spring_action: 'update' # install, update, rollback
+spring_app_repo_release: '0.0.3'
 
 
 # default vars 

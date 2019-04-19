@@ -24,13 +24,16 @@
         daemon_reload: yes
         enabled: yes
         state: started
-    - pause:
-        prompt: 'wait {{ spring_app_name }} up'
-        seconds: 5
+#    - pause:
+#        prompt: 'wait {{ spring_app_name }} up'
+#        seconds: 5
     - uri:
         url: http://localhost:{{ spring_app_port }}/?req=ping
         return_content: yes
       register: response
+      until: response.status == 200
+      retries: 5
+      delay: 1
       failed_when: "'pong' not in response.content"
 
 - set_fact:

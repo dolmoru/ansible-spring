@@ -48,5 +48,8 @@
     url: http://localhost/?req=ping
     return_content: yes
   register: response
+  until: response.status == 200
+  retries: 5
+  delay: 1
   failed_when: "'pong' not in response.content"
 
