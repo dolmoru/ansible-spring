@@ -1,6 +1,4 @@
 ---
-- import_tasks: ../../common/tasks/install_pkgs.yml
-
 - set_fact:
     spring_app_jar: '{{ spring_app_dir }}/{{ spring_app_name }}.jar'
     spring_app_systemd_file: '/etc/systemd/system/{{ spring_app_name }}.service'
@@ -30,7 +28,11 @@
     - debug:
         msg: '{{ spring_app_name }} not installed.'
     - meta: end_play
-  when: systemd_file.stat.exists == False and jar_file.stat.exists == True and spring_action == 'update'
+  when: systemd_file.stat.exists == False and jar_file.stat.exists == False and (spring_action == 'update' or spring_action == 'rollback')
+
+####
+
+- import_tasks: ../../common/tasks/install_pkgs.yml
 
 ####
 
@@ -119,7 +121,10 @@
       failed_when: jar_previous.stat.exists != True
     - include_tasks: update.yml
       vars:
-        spring_app_jar_upd: '{{ spring_app_jar_previous }}'
+        spring_app_src: '{{ spring_app_jar_previous }}'
+    - file:
+        path: '{{ spring_app_jar_previous }}'
+        state: absent
   when: spring_action == 'rollback'
 
 ####

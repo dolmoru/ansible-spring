@@ -2,7 +2,7 @@
 - name: Copy jar file to '{{ spring_app_dir }}'
   copy:
     src: '{{ spring_app_src }}'
-    dest: '{{ spring_app_jar }}'
+    dest: '{{ spring_app_dst }}'
     owner: '{{ spring_user }}'
     group: '{{ spring_group }}'
     mode: 0644
@@ -24,9 +24,6 @@
         daemon_reload: yes
         enabled: yes
         state: started
-#    - pause:
-#        prompt: 'wait {{ spring_app_name }} up'
-#        seconds: 5
     - uri:
         url: http://localhost:{{ spring_app_port }}/?req=ping
         return_content: yes

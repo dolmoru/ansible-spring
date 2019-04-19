@@ -8,7 +8,7 @@
 - include_tasks: copy_jar_systemd.yml
   vars:
     spring_app_name: '{{ spring_app_name_upd }}'
-    spring_app_jar: '{{ spring_app_jar_upd }}'
+    spring_app_dst: '{{ spring_app_jar_upd }}'
     spring_app_systemd_file: '{{ spring_app_systemd_file_upd }}'
     spring_app_port: '{{ spring_app_port_upd }}'
 
@@ -29,6 +29,8 @@
   when: spring_action == 'update'
 
 - include_tasks: copy_jar_systemd.yml
+  vars:
+    spring_app_dst: '{{ spring_app_jar }}'
 
 - import_role:
     name: nginx
