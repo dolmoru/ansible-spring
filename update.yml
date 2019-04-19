@@ -1,0 +1,12 @@
+---
+- name: Spring boot
+  hosts: spring
+  remote_user: root
+
+  roles:
+    - role: spring
+      vars:
+        spring_action: 'update'
+        spring_app_repo_release:
+    - nginx
+

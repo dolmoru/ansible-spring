@@ -1,0 +1,13 @@
+---
+- name: Spring boot
+  hosts: spring
+  remote_user: root
+
+  roles:
+    - common
+    - role: spring
+      vars:
+        spring_action: 'install'
+        spring_app_repo_release: '0.0.1'
+    - nginx
+
