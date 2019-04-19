@@ -1,0 +1,16 @@
+---
+# Please set spring_action and release(if needed):
+#
+spring_action: 'install' # install, update, rollback
+spring_app_repo_release: 
+
+
+# default vars 
+spring_app_name: 'spring'
+spring_app_dir: '/opt/spring-apps'
+spring_app_port: 8080
+spring_app_repo: 'https://github.com/dolmoru/spring-ping.git' 
+spring_app_repo_dir: '{{ spring_app_dir }}/{{ spring_app_name }}_repo'
+spring_user: 'spring'
+spring_group: 'spring'
+
