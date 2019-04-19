@@ -3,7 +3,7 @@
     spring_app_name_upd: '{{ spring_app_name }}_new'
     spring_app_jar_upd: '{{ spring_app_dir }}/{{ spring_app_name }}_new.jar'
     spring_app_systemd_file_upd: '/etc/systemd/system/{{ spring_app_name }}_new.service'
-    spring_app_port_upd: 8081
+    spring_app_port_upd: '{{ spring_app_port_upd }}'
 
 - include_tasks: copy_jar_systemd.yml
   vars:
