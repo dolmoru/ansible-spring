@@ -114,6 +114,8 @@
 #### Install 
 
 - include_tasks: copy_jar_systemd.yml
+  vars:
+    spring_app_dst: '{{ spring_app_jar }}'
   when: spring_action == 'install'
 
 #### Update 
