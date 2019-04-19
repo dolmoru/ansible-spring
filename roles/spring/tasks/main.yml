@@ -25,6 +25,13 @@
     - meta: end_play
   when: systemd_file.stat.exists == True and jar_file.stat.exists == True and spring_action == 'install'
 
+- name: "Service not installed"
+  block:
+    - debug:
+        msg: '{{ spring_app_name }} not installed.'
+    - meta: end_play
+  when: systemd_file.stat.exists == False and jar_file.stat.exists == True and spring_action == 'update'
+
 ####
 
 - name: Group for spring app
