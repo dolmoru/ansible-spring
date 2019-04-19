@@ -1,0 +1,2 @@
+[spring]
+srv01 ansible_ssh_user=root ansible_ssh_host=
