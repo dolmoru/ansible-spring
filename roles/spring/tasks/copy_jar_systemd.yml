@@ -24,14 +24,9 @@
         daemon_reload: yes
         enabled: yes
         state: started
-    - uri:
-        url: http://localhost:{{ spring_app_port }}/?req=ping
-        return_content: yes
-      register: response
-      until: response.status == 200
-      retries: 5
-      delay: 1
-      failed_when: "'pong' not in response.content"
+    - include_tasks: ../../nginx/tasks/web_check.yml
+      vars:
+        web_check_url: 'http://localhost:{{ spring_app_port }}/?req=ping'
 
 - set_fact:
         nginx_proxy_pass: 'http://localhost:{{ spring_app_port }}'

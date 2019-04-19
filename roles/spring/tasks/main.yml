@@ -16,6 +16,11 @@
     path: '{{ spring_app_jar }}'
   register: jar_file
 
+- name: Check previous jar exists
+  stat:
+    path: '{{ spring_app_jar_previous }}'
+  register: jar_previous
+
 - name: "Alredy installed"
   block:
     - debug:
@@ -29,6 +34,13 @@
         msg: '{{ spring_app_name }} not installed.'
     - meta: end_play
   when: systemd_file.stat.exists == False and jar_file.stat.exists == False and (spring_action == 'update' or spring_action == 'rollback')
+
+- name: "Previoud installed service does not exist."
+  block:
+    - debug:
+        msg: '{{ spring_app_jar_previous }} does not exist'
+    - meta: end_play
+  when: systemd_file.stat.exists == True and jar_file.stat.exists == True and jar_previous.stat.exists == False and spring_action == 'rollback'
 
 ####
 

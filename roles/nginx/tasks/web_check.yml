@@ -1,0 +1,11 @@
+---
+- name: Check web service
+  uri:
+    url: '{{ web_check_url }}'
+    return_content: yes
+  register: response
+  until: response.status == 200
+  retries: 7
+  delay: 1
+  failed_when: "'pong' not in response.content"
+
