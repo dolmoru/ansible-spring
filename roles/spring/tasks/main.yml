@@ -1,0 +1,118 @@
+---
+- import_tasks: ../../common/tasks/install_pkgs.yml
+
+- set_fact:
+    spring_app_jar: '{{ spring_app_dir }}/{{ spring_app_name }}.jar'
+    spring_app_systemd_file: '/etc/systemd/system/{{ spring_app_name }}.service'
+    spring_app_jar_previous: '{{ spring_app_dir }}/{{ spring_app_name }}_previous.jar'
+
+####
+
+- name: Check systemd service already exists
+  stat:
+    path: '{{ spring_app_systemd_file }}'
+  register: systemd_file
+
+- name: Check artifact already exists
+  stat:
+    path: '{{ spring_app_jar }}'
+  register: jar_file
+
+- name: "Alredy installed"
+  block:
+    - debug:
+        msg: "{{ spring_app_name }} already installed. If you want to update the {{ spring_app_name }}, please switch variable 'spring_action' to value 'update' and play again."
+    - meta: end_play
+  when: systemd_file.stat.exists == True and jar_file.stat.exists == True and spring_action == 'install'
+
+####
+
+- name: Group for spring app
+  group:
+    name: '{{ spring_group }}'
+    state: present
+
+- name: User for spring app
+  user:
+    name: '{{ spring_user }}'
+    group: '{{ spring_group }}'
+    state: present
+
+- name: Directory for spring app
+  file:
+    path: '{{ spring_app_dir }}'
+    owner: '{{ spring_user }}'
+    group: '{{ spring_group }}'
+    state: directory
+    mode: 0755
+
+####
+
+- name: Clone repository if release unset
+  git:
+    repo: '{{ spring_app_repo }}'
+    dest: '{{ spring_app_repo_dir }}'
+  when: spring_app_repo_release is undefined or spring_app_repo_release == '' or spring_app_repo_release == None
+  register: git_hint1
+
+- name: Clone repository if release is set
+  git:
+    repo: '{{ spring_app_repo }}'
+    dest: '{{ spring_app_repo_dir }}'
+    version: '{{ spring_app_repo_release }}'
+  when: spring_app_repo_release is defined and spring_app_repo_release != None and spring_app_repo_release != ''
+  register: git_hint2
+
+- name: "Repository is unchanged"
+  block:
+    - debug:
+        msg: "Repository is not changed"
+    - meta: end_play
+  when: git_hint1 is not changed and git_hint2 is not changed and spring_action == 'update'
+
+####
+
+- name: Compile spring app
+  block:
+    - shell: ./mvnw clean package | grep 'Building jar:' | awk '{ print $4 }'
+      args:
+        chdir: '{{ spring_app_repo_dir }}'
+      register: spring_app_compiled
+      failed_when: spring_app_compiled.stdout|length == 0
+    - set_fact:
+        spring_app_src: '{{ spring_app_compiled.stdout }}'      
+  when: git_hint1 is changed or git_hint2 is changed
+  rescue:
+    - debug:
+        msg: "Compile Failed! Removing repository"
+    - file:
+        path: '{{ spring_app_repo_dir }}'
+        state: absent
+    - meta: end_play
+
+#### Install 
+
+- include_tasks: copy_jar_systemd.yml
+  when: spring_action == 'install'
+
+#### Update 
+
+- include_tasks: update.yml
+  when: spring_action == 'update'
+
+#### Rollback to previous isntalled
+
+- name: Rollback to previous installed version
+  block:
+    - stat: 
+        path: '{{ spring_app_jar_previous }}'
+      register: jar_previous
+    - fail:
+        msg: "{{ spring_app_jar_previous }} does not exists"
+      failed_when: jar_previous.stat.exists != True
+    - include_tasks: update.yml
+      vars:
+        spring_app_jar_upd: '{{ spring_app_jar_previous }}'
+  when: spring_action == 'rollback'
+
+####

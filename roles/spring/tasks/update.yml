@@ -1,0 +1,46 @@
+---
+- set_fact:
+    spring_app_name_upd: '{{ spring_app_name }}_new'
+    spring_app_jar_upd: '{{ spring_app_dir }}/{{ spring_app_name }}_new.jar'
+    spring_app_systemd_file_upd: '/etc/systemd/system/{{ spring_app_name }}_new.service'
+    spring_app_port_upd: 8081
+
+- include_tasks: copy_jar_systemd.yml
+  vars:
+    spring_app_name: '{{ spring_app_name_upd }}'
+    spring_app_jar: '{{ spring_app_jar_upd }}'
+    spring_app_systemd_file: '{{ spring_app_systemd_file_upd }}'
+    spring_app_port: '{{ spring_app_port_upd }}'
+
+- import_role:
+    name: nginx
+
+- systemd:
+    name: '{{ spring_app_name }}'
+    state: stopped
+
+- copy:
+    src: '{{ spring_app_src }}'
+    dest: '{{ spring_app_jar_previous }}'
+    owner: '{{ spring_user }}'
+    group: '{{ spring_group }}'
+    mode: 0644
+    remote_src: yes
+  when: spring_action == 'update'
+
+- include_tasks: copy_jar_systemd.yml
+
+- import_role:
+    name: nginx
+
+- systemd:
+    name: '{{ spring_app_name_upd }}'
+    state: stopped
+
+- file:
+    path: '{{ item }}'
+    state: absent
+  with_items:
+    - '{{ spring_app_jar_upd }}'
+    - '{{ spring_app_systemd_file_upd }}'
+

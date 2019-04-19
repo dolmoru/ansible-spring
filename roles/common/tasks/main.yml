@@ -1,0 +1,6 @@
+--- 
+# Task for upgrade all packages 
+# !! Host maybe restarted. Disable if neccessary
+- import_tasks: upgrade_all_pkgs.yml 
+- import_tasks: install_pkgs.yml
+- import_tasks: chrony.yml

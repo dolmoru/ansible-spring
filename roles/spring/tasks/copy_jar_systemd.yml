@@ -1,0 +1,38 @@
+---
+- name: Copy jar file to '{{ spring_app_dir }}'
+  copy:
+    src: '{{ spring_app_src }}'
+    dest: '{{ spring_app_jar }}'
+    owner: '{{ spring_user }}'
+    group: '{{ spring_group }}'
+    mode: 0644
+    remote_src: yes
+
+- name: Create systemd service
+  template:
+    src: spring_systemd.service.j2
+    dest: '{{ spring_app_systemd_file }}'
+    owner: root
+    group: root
+    mode: 0644
+  register: systemd_service
+
+- name: Start and check
+  block:
+    - systemd:
+        name: '{{ spring_app_name }}'
+        daemon_reload: yes
+        enabled: yes
+        state: started
+    - pause:
+        prompt: 'wait {{ spring_app_name }} up'
+        seconds: 5
+    - uri:
+        url: http://localhost:{{ spring_app_port }}/?req=ping
+        return_content: yes
+      register: response
+      failed_when: "'pong' not in response.content"
+
+- set_fact:
+        nginx_proxy_pass: 'http://localhost:{{ spring_app_port }}'
+

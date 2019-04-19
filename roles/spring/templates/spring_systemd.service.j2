@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description={{ spring_app_name }}
+After=syslog.target
+
+[Service]
+#EnvironmentFile=
+WorkingDirectory={{ spring_app_dir }}
+User={{ spring_user }}
+ExecStart=/bin/java -Dserver.port={{ spring_app_port }} -jar '{{ spring_app_jar }}'
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

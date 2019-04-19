@@ -1,0 +1,10 @@
+---
+- name: Copy the chrony.conf.
+  template:
+    src: chrony.conf.j2
+    dest: "/etc/chrony.conf"
+    owner: root
+    group: root
+    mode: 0664
+  notify: restart chrony
+

@@ -1,0 +1,8 @@
+install_pkgs:
+  - nginx
+  - libsemanage-python
+
+nginx_main_config: '/etc/nginx/nginx.conf'
+nginx_main_template: 'nginx.conf.j2'
+nginx_conf_dir: '/etc/nginx/conf.d'
+nginx_vhost_template: 'vhost.conf.j2'

@@ -1,0 +1,6 @@
+---
+- name: Ensure '{{ install_pkgs }}' are installed.
+  yum:
+    name: '{{ install_pkgs }}' 
+    state: present
+

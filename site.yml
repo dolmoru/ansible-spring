@@ -1,0 +1,10 @@
+---
+- name: Spring boot
+  hosts: spring
+  remote_user: root
+
+  roles:
+    - common
+    - spring
+    - nginx
+

@@ -1,0 +1,13 @@
+---
+install_pkgs:
+  - epel-release
+  - chrony
+
+chrony_config_server:
+  - 0.centos.pool.ntp.org
+  - 1.centos.pool.ntp.org
+  - 2.centos.pool.ntp.org
+  - 3.centos.pool.ntp.org
+
+chrony_config_allow: []
+

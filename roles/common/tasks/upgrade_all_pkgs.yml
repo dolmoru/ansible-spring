@@ -1,0 +1,18 @@
+---
+- name: yum upgrade all packages.
+  yum: name=* state=latest
+
+- name: Check for reboot hint.
+  shell: LAST_KERNEL=$(rpm -q --last kernel | awk 'NR==1{sub(/kernel-/,""); print $1}'); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
+  ignore_errors: true
+  register: reboot_hint
+
+- name: Rebooting
+  reboot:
+    msg: "Upgrade required reboot"
+  when: reboot_hint.stdout == 'reboot'
+  register: rebooting
+
+- name: Wait for server to reboot
+  pause: seconds=30
+  when: rebooting is changed

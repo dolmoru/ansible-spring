@@ -1,0 +1,52 @@
+---
+- include_tasks: ../../common/tasks/install_pkgs.yml
+
+- name: Create main config
+  template:
+    src: '{{ nginx_main_template }}'
+    dest: '{{ nginx_main_config }}'
+    owner: root
+    group: root
+    mode: 0644
+  notify: start nginx
+
+- name: Check the {{ nginx_conf_dir }} exist
+  file:
+    path: '{{ nginx_conf_dir }}'
+    state: directory
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Add vhost config
+  template:
+    src: '{{ nginx_vhost_template }}'
+    dest: '{{ nginx_conf_dir }}/{{ spring_app_name }}.conf'
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload nginx
+
+- name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+
+- name: Configure firewalld
+  firewalld:
+    service: http
+    permanent: yes
+    immediate: yes
+    state: enabled
+ 
+# Force run handlers for web check
+- meta: flush_handlers
+
+- name: Check web service
+  uri:
+    url: http://localhost/?req=ping
+    return_content: yes
+  register: response
+  failed_when: "'pong' not in response.content"
+
